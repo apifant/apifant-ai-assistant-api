@@ -1,0 +1,2770 @@
+openapi: 3.0.1
+info:
+  description: Demo for a phone ai assistant
+  title: "@tribe/ai-assistant-hub"
+  version: 0.7.1
+servers:
+  - url: http://localhost:3002
+security:
+  - bearerAuth: []
+paths:
+  /api/assistant/add:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Assistant wrapper
+        content:
+          application/json:
+            schema: &a4
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      description: Name of assistant
+                    instruction:
+                      type: string
+                      description: Instructions for the assistant
+                    description:
+                      type: string
+                      description: Description of assistant
+                    endinstruction:
+                      type: string
+                      description: A instruction on how to detect and handle the ending of a speech
+                    code:
+                      type: string
+                      description: DTMF code
+                    greeting:
+                      type: string
+                      description: Assistant Greeting
+                    target_language:
+                      type: string
+                      enum: &a1
+                        - en
+                        - es
+                        - fr
+                        - de
+                        - it
+                        - pt
+                        - nl
+                        - ru
+                        - zh
+                        - ja
+                        - ko
+                        - ar
+                      description: Target language for the transcription
+                    result_target_webhook:
+                      type: string
+                      description: Target url where to post the data to
+                  required:
+                    - name
+                    - instruction
+                    - description
+                    - endinstruction
+                  description: Assistant Config
+                type:
+                  type: string
+                  description: Type of assistant
+                detection:
+                  type: string
+                  enum:
+                    - azure
+                    - apifant
+                  description: Type of voice detection provider
+                owner_type:
+                  type: string
+                  enum: &a2
+                    - public
+                    - personal
+                    - organization
+                  description: Owner Type
+                character_id:
+                  type: string
+                  description: ID of associated character (optional)
+                parallel_mode:
+                  type: boolean
+                  description: Allow ai to run in cluster for fastest execution
+                extraconfig:
+                  type: object
+                  additionalProperties: true
+                  description: Extra assistant config data
+                config:
+                  type: object
+                  properties:
+                    allowBarkIn:
+                      type: boolean
+                      description: Allow user to bark in to the assistants tts
+                  required:
+                    - allowBarkIn
+                  description: Assistant Config
+                additionalInstructions:
+                  type: array
+                  description: Additional instructions
+                  items:
+                    type: string
+                    description: Additional instruction
+              required:
+                - data
+                - type
+                - detection
+                - owner_type
+              description: Assistant
+  /api/assistant/assign:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Assistant wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phonenumberId:
+                  type: string
+                  description: Id of phonenumber
+                assistantId:
+                  type: string
+                  description: Id of assistant
+              required:
+                - phonenumberId
+                - assistantId
+              description: Assistant
+  /api/assistant/list:
+    parameters: []
+    get:
+      description: Return list of all assistant objects
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assistant:
+                    type: array
+                    description: List of all assistant objects
+                    items: &a3
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Id of assistant
+                        data:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              description: Name of assistant
+                            instruction:
+                              type: string
+                              description: Instructions for the assistant
+                            description:
+                              type: string
+                              description: Description of assistant
+                            endinstruction:
+                              type: string
+                              description: A instruction on how to detect and handle the ending of a speech
+                            code:
+                              type: string
+                              description: DTMF code
+                            greeting:
+                              type: string
+                              description: Assistant Greeting
+                            target_language:
+                              type: string
+                              enum: *a1
+                              description: Target language for the transcription
+                            result_target_webhook:
+                              type: string
+                              description: Target url where to post the data to
+                          required:
+                            - name
+                            - instruction
+                            - description
+                            - endinstruction
+                          description: Assistant Config
+                        type:
+                          type: string
+                          description: Type of assistant
+                        detection:
+                          type: string
+                          enum:
+                            - azure
+                            - apifant
+                          description: Type of voice provider
+                        owner_type:
+                          type: string
+                          enum: *a2
+                          description: Owner Type
+                        character_id:
+                          type: string
+                          description: ID of associated character (optional)
+                        parallel_mode:
+                          type: boolean
+                          description: Allow ai to run in cluster for fastest execution
+                        extraconfig:
+                          type: object
+                          additionalProperties: true
+                          description: Extra assistant config data
+                        config:
+                          type: object
+                          properties:
+                            allowBarkIn:
+                              type: boolean
+                              description: Allow user to bark in to the assistants tts
+                          required:
+                            - allowBarkIn
+                          description: Assistant Config
+                        additionalInstructions:
+                          type: array
+                          description: Additional instructions
+                          items:
+                            type: string
+                            description: Additional instruction
+                      required:
+                        - id
+                        - data
+                        - type
+                        - detection
+                        - owner_type
+                      description: Assistant
+                required:
+                  - assistant
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/find/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of assistant object
+        schema:
+          type: string
+          description: Id of assistant object
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assistant: *a3
+                required:
+                  - assistant
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/remove/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of assistant object
+        schema:
+          type: string
+          description: Id of assistant object
+    delete:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/update/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of assistant object
+        schema:
+          type: string
+          description: Id of assistant object
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Params to add assistant
+        content:
+          application/json:
+            schema: *a4
+  /api/assistant/type/list:
+    parameters: []
+    get:
+      description: Return list of all assistant types
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  types:
+                    type: array
+                    description: List of all assistant types
+                    items:
+                      type: string
+                      description: Assistant type
+                required:
+                  - types
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/type/details:
+    parameters: []
+    get:
+      description: Return list of all assistant types data
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  types:
+                    type: array
+                    description: List of all assistant types data
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of assistant
+                        functions:
+                          type: array
+                          description: List of all functions available
+                          items:
+                            type: string
+                            description: Assistant functions
+                        instruction:
+                          type: string
+                          description: Instructions for the assistant
+                        endinstruction:
+                          type: string
+                          description: A instruction on how to detect and handle the ending of a speech
+                      required:
+                        - name
+                        - functions
+                        - instruction
+                        - endinstruction
+                      description: Response Wrapper
+                required:
+                  - types
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/type/find/{type}:
+    parameters:
+      - in: path
+        required: true
+        name: type
+        description: Type of Assistant
+        schema:
+          type: string
+          description: Type of Assistant
+    get:
+      description: Return list of all assistant types
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    description: Name of assistant
+                  functions:
+                    type: array
+                    description: List of all functions available
+                    items:
+                      type: string
+                      description: Assistant functions
+                  instruction:
+                    type: string
+                    description: Instructions for the assistant
+                  endinstruction:
+                    type: string
+                    description: A instruction on how to detect and handle the ending of a speech
+                required:
+                  - name
+                  - functions
+                  - instruction
+                  - endinstruction
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/knowledge/add:
+    parameters: []
+    post:
+      description: Add a knowledge base entry to an assistant
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Knowledge Base Entry
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assistant_id:
+                  type: string
+                  description: ID of the assistant
+                name:
+                  type: string
+                  description: Name of the knowledge base entry
+                content:
+                  type: string
+                  description: Extracted text content from the source
+                source_type:
+                  type: string
+                  enum:
+                    - text_file
+                    - url
+                    - manual
+                  description: Type of source
+                source_url:
+                  type: string
+                  description: URL source if source_type is url
+                file_name:
+                  type: string
+                  description: Original file name if source_type is text_file
+                file_size:
+                  type: string
+                  description: File size in bytes if source_type is text_file
+              required:
+                - assistant_id
+                - name
+                - content
+                - source_type
+                - source_url
+                - file_name
+                - file_size
+              description: Knowledge Base Entry
+  /api/assistant/knowledge/list/{assistant_id}:
+    parameters:
+      - in: path
+        required: true
+        name: assistant_id
+        description: ID of the assistant
+        schema:
+          type: string
+          description: ID of the assistant
+    get:
+      description: Get all knowledge base entries for an assistant
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  knowledge_base_entries:
+                    type: array
+                    description: List of knowledge base entries
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: ID of the knowledge base entry
+                        assistant_id:
+                          type: string
+                          description: ID of the assistant
+                        name:
+                          type: string
+                          description: Name of the knowledge base entry
+                        content:
+                          type: string
+                          description: Extracted text content from the source
+                        source_type:
+                          type: string
+                          description: Type of source
+                        source_url:
+                          type: string
+                          description: URL source if source_type is url
+                        file_name:
+                          type: string
+                          description: Original file name if source_type is text_file
+                        file_size:
+                          type: string
+                          description: File size in bytes if source_type is text_file
+                        extraction_status:
+                          type: string
+                          description: Status of content extraction
+                        error_message:
+                          type: string
+                          description: Error message if extraction failed
+                        created_at:
+                          type: string
+                          description: Creation timestamp
+                        updated_at:
+                          type: string
+                          description: Last update timestamp
+                      required:
+                        - id
+                        - assistant_id
+                        - name
+                        - content
+                        - source_type
+                        - source_url
+                        - file_name
+                        - file_size
+                        - extraction_status
+                        - error_message
+                        - created_at
+                        - updated_at
+                      description: Knowledge Base Entry
+                required:
+                  - knowledge_base_entries
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/knowledge/find/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: ID of the knowledge base entry
+        schema:
+          type: string
+          description: ID of the knowledge base entry
+    get:
+      description: Get a specific knowledge base entry
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  knowledge_base_entry:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: ID of the knowledge base entry
+                      assistant_id:
+                        type: string
+                        description: ID of the assistant
+                      name:
+                        type: string
+                        description: Name of the knowledge base entry
+                      content:
+                        type: string
+                        description: Extracted text content from the source
+                      source_type:
+                        type: string
+                        description: Type of source
+                      source_url:
+                        type: string
+                        description: URL source if source_type is url
+                      file_name:
+                        type: string
+                        description: Original file name if source_type is text_file
+                      file_size:
+                        type: string
+                        description: File size in bytes if source_type is text_file
+                      extraction_status:
+                        type: string
+                        description: Status of content extraction
+                      error_message:
+                        type: string
+                        description: Error message if extraction failed
+                      created_at:
+                        type: string
+                        description: Creation timestamp
+                      updated_at:
+                        type: string
+                        description: Last update timestamp
+                    required:
+                      - id
+                      - assistant_id
+                      - name
+                      - content
+                      - source_type
+                      - source_url
+                      - file_name
+                      - file_size
+                      - extraction_status
+                      - error_message
+                      - created_at
+                      - updated_at
+                    description: Knowledge Base Entry
+                required:
+                  - knowledge_base_entry
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/knowledge/remove/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: ID of the knowledge base entry
+        schema:
+          type: string
+          description: ID of the knowledge base entry
+    delete:
+      description: Delete a knowledge base entry
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/knowledge/upload:
+    parameters: []
+    post:
+      description: Upload a file to extract content for knowledge base
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request File Upload
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assistant_id:
+                  type: string
+                  description: ID of the assistant
+                name:
+                  type: string
+                  description: Name for the knowledge base entry
+                file:
+                  type: string
+                  description: Base64 encoded file content
+                file_name:
+                  type: string
+                  description: Original file name
+              required:
+                - assistant_id
+                - name
+                - file
+                - file_name
+              description: File Upload
+  /api/assistant/knowledge/extract-url:
+    parameters: []
+    post:
+      description: Extract content from a URL for knowledge base
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request URL Extraction
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assistant_id:
+                  type: string
+                  description: ID of the assistant
+                name:
+                  type: string
+                  description: Name for the knowledge base entry
+                url:
+                  type: string
+                  description: URL to extract content from
+              required:
+                - assistant_id
+                - name
+                - url
+              description: URL Extraction
+  /api/phonenumber/active/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of phonenumber object
+        schema:
+          type: string
+          description: Id of phonenumber object
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/phonenumber/outbound/{id}/{number}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of phonenumber object
+        schema:
+          type: string
+          description: Id of phonenumber object
+      - in: path
+        required: true
+        name: number
+        description: Number to call with configured assistant
+        schema:
+          type: string
+          description: Number to call with configured assistant
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request PhoneNumber wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assistantID:
+                  type: string
+                  description: assistantID
+                additionalInstructions:
+                  type: string
+                  description: additionalInstructions
+              required: []
+              description: Response Wrapper
+  /api/phonenumber/mode/{id}/{mode}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of phonenumber object
+        schema:
+          type: string
+          description: Id of phonenumber object
+      - in: path
+        required: true
+        name: mode
+        description: Different setups for the phonenumber and how it acts.
+        schema:
+          type: string
+          enum: &a5
+            - production
+            - test
+            - echo
+          description: Different setups for the phonenumber and how it acts.
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/phonenumber/add:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request PhoneNumber wrapper
+        content:
+          application/json:
+            schema: &a7
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    value:
+                      type: string
+                      description: phonenumber
+                    username:
+                      type: string
+                      description: Fonial Username
+                    password:
+                      type: string
+                      description: Fonial user password
+                    description:
+                      type: string
+                      description: Description of phonenumber
+                    active:
+                      type: boolean
+                      description: Flag whether number is active
+                    mode:
+                      type: string
+                      enum: *a5
+                      description: Different setups for the phonenumber and how it acts.
+                  required:
+                    - value
+                    - username
+                    - password
+                    - description
+                    - active
+                    - mode
+                  description: PhoneNumber Config
+                owner_type:
+                  type: string
+                  enum: *a2
+                  description: Owner Type
+                assignedassistantid:
+                  type: string
+                  description: Id of pthe assigned assistant
+              required:
+                - data
+                - owner_type
+              description: PhoneNumber
+  /api/phonenumber/list:
+    parameters: []
+    get:
+      description: Return list of all phonenumber objects
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  phonenumber:
+                    type: array
+                    description: List of all phonenumber objects
+                    items: &a6
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Id of phonenumber
+                        data:
+                          type: object
+                          properties:
+                            value:
+                              type: string
+                              description: phonenumber
+                            username:
+                              type: string
+                              description: Fonial Username
+                            password:
+                              type: string
+                              description: Fonial user password
+                            description:
+                              type: string
+                              description: Description of phonenumber
+                            active:
+                              type: boolean
+                              description: Flag whether number is active
+                            mode:
+                              type: string
+                              enum: *a5
+                              description: Different setups for the phonenumber and how it acts.
+                          required:
+                            - value
+                            - username
+                            - password
+                            - description
+                            - active
+                            - mode
+                          description: PhoneNumber Config
+                        owner_type:
+                          type: string
+                          enum: *a2
+                          description: Owner Type
+                        assignedassistantid:
+                          type: string
+                          description: Id of pthe assigned assistant
+                        active:
+                          type: boolean
+                          description: Flag whether number is active
+                      required:
+                        - id
+                        - data
+                        - owner_type
+                      description: PhoneNumber
+                required:
+                  - phonenumber
+                description: Response Wrapper
+      parameters: []
+  /api/phonenumber/find/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of phonenumber object
+        schema:
+          type: string
+          description: Id of phonenumber object
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  phonenumber: *a6
+                required:
+                  - phonenumber
+                description: Response Wrapper
+      parameters: []
+  /api/phonenumber/remove/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of phonenumber object
+        schema:
+          type: string
+          description: Id of phonenumber object
+    delete:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/phonenumber/update/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of phonenumber object
+        schema:
+          type: string
+          description: Id of phonenumber object
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Params to add phonenumber
+        content:
+          application/json:
+            schema: *a7
+  /api/chat/start:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chat: &a8
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Id of chat
+                      timestamp:
+                        type: string
+                        description: timestamp
+                      name:
+                        type: string
+                        description: Name of chat
+                      assignedassistantid:
+                        type: string
+                        description: Id of the assigned assistant
+                      messages:
+                        type: array
+                        description: Message history
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Id of message
+                            timestamp:
+                              type: string
+                              description: timestamp
+                            message:
+                              type: string
+                              description: Message content
+                            speaker:
+                              type: string
+                              enum:
+                                - user
+                                - assistant
+                              description: Speaker of conversation
+                          required:
+                            - id
+                            - timestamp
+                            - message
+                            - speaker
+                          description: Messages
+                      type:
+                        type: string
+                        enum:
+                          - inbound
+                          - outbound
+                        description: Type of conversation
+                      owner_type:
+                        type: string
+                        enum: *a2
+                        description: Owner Type
+                    required:
+                      - id
+                      - timestamp
+                      - name
+                      - assignedassistantid
+                      - messages
+                      - type
+                      - owner_type
+                    description: Chat
+                required:
+                  - chat
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Chat wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of chat
+                assignedassistantid:
+                  type: string
+                  description: Id of the assigned assistant
+                type:
+                  type: string
+                  enum:
+                    - inbound
+                    - outbound
+                  description: Type of conversation
+                owner_type:
+                  type: string
+                  enum: *a2
+                  description: Owner Type
+                message:
+                  type: string
+                  description: First message of chat
+                model:
+                  type: string
+                  enum: &a10
+                    - OpenAi gpt-3.5-turbo
+                    - OpenAi gpt-4o-mini
+                    - OpenAi gpt-4
+                    - OpenAi gpt-4-turbo
+                    - Azure gpt-4o-mini
+                    - Azure gpt-35-turbo
+                    - Azure gpt-35-turbo-16k
+                    - Google gemini-1.5-flash
+                    - Google gemini-2.0-flash
+                    - Ollama llama3:latest
+                    - Ollama deepseek-r1:8b
+                    - Ollama qwen2.5:7b
+                  description: Model to be used
+                overdial:
+                  type: string
+                  description: "Overdial for the chat "
+              required:
+                - name
+                - assignedassistantid
+                - type
+                - owner_type
+              description: Chat
+  /api/chat/add:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chat: *a8
+                required:
+                  - chat
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Chat wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Id of chat
+                message:
+                  type: string
+                  description: First message of chat
+              required:
+                - id
+                - message
+              description: Chat
+  /api/chat/list:
+    parameters: []
+    get:
+      description: Return list of all chat objects
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chats:
+                    type: array
+                    description: List of all chat objects
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Id of chat
+                        timestamp:
+                          type: string
+                          description: timestamp
+                        name:
+                          type: string
+                          description: Name of chat
+                        assignedassistantid:
+                          type: string
+                          description: Id of the assigned assistant
+                        type:
+                          type: string
+                          enum:
+                            - inbound
+                            - outbound
+                          description: Type of conversation
+                        owner_type:
+                          type: string
+                          description: id of the voice provider
+                      required:
+                        - id
+                        - timestamp
+                        - name
+                        - assignedassistantid
+                        - type
+                        - owner_type
+                      description: Chat
+                required:
+                  - chats
+                description: Response Wrapper
+      parameters: []
+  /api/chat/find/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of chat object
+        schema:
+          type: string
+          description: Id of chat object
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chat: *a8
+                required:
+                  - chat
+                description: Response Wrapper
+      parameters: []
+  /api/chat/remove/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of chat object
+        schema:
+          type: string
+          description: Id of chat object
+    delete:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/voices/add:
+    parameters: []
+    post:
+      description: Add a new voice configuration
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Voice wrapper
+        content:
+          application/json:
+            schema: &a9
+              type: object
+              properties:
+                voice_id:
+                  type: string
+                  description: Voice identifier from the provider
+                type:
+                  type: string
+                  enum:
+                    - azure
+                    - elevenlabs
+                    - apifant
+                    - azure-sweden
+                  description: Type of voice provider
+                name:
+                  type: string
+                  description: Name of the voice
+              required:
+                - voice_id
+                - type
+                - name
+              description: Voice Create
+  /api/voices/list:
+    parameters: []
+    get:
+      description: Return list of all assistant voices
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  types:
+                    type: array
+                    description: List of all assistant types
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                          description: Name of assistant voice
+                        id:
+                          type: string
+                          description: Id of the assistant
+                        voice_id:
+                          type: string
+                          description: id of the voice provider
+                        type:
+                          type: string
+                          enum:
+                            - azure
+                            - elevenlabs
+                            - apifant
+                            - azure-sweden
+                          description: Type of voice provider
+                      required:
+                        - name
+                        - id
+                        - voice_id
+                        - type
+                      description: Voice Wrapper
+                required:
+                  - types
+                description: Response Wrapper
+      parameters: []
+  /api/voices/find/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of voice object
+        schema:
+          type: string
+          description: Id of voice object
+    get:
+      description: Find a specific voice by ID
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  voice:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Id of voice
+                      voice_id:
+                        type: string
+                        description: Voice identifier from the provider
+                      type:
+                        type: string
+                        enum:
+                          - azure
+                          - elevenlabs
+                          - apifant
+                          - azure-sweden
+                        description: Type of voice provider
+                      name:
+                        type: string
+                        description: Name of the voice
+                    required:
+                      - id
+                      - voice_id
+                      - type
+                      - name
+                    description: Voice
+                required:
+                  - voice
+                description: Response Wrapper
+      parameters: []
+  /api/voices/update/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of voice object
+        schema:
+          type: string
+          description: Id of voice object
+    post:
+      description: Update a voice configuration
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Voice wrapper
+        content:
+          application/json:
+            schema: *a9
+  /api/voices/remove/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of voice object
+        schema:
+          type: string
+          description: Id of voice object
+    delete:
+      description: Remove a voice configuration
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/voices/assign:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Assistant wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                voiceID:
+                  type: string
+                  description: Id of voice
+                assistantId:
+                  type: string
+                  description: Id of assistant
+              required:
+                - voiceID
+                - assistantId
+              description: Assistant
+  /api/webhooks/confirm:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Demo body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: title
+                name:
+                  type: string
+                  description: name
+                surname:
+                  type: string
+                  description: surname
+                adress:
+                  type: string
+                  description: adress
+                email:
+                  type: string
+                  description: email
+                telephone:
+                  type: string
+                  description: telephone
+                company:
+                  type: string
+                  description: company
+                topic:
+                  type: string
+                  description: topic
+              required:
+                - title
+                - name
+                - surname
+                - adress
+                - email
+                - telephone
+                - company
+                - topic
+              description: ""
+  /api/webhooks/config:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Demo body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  description: Agent Config
+                  items:
+                    type: object
+                    additionalProperties: true
+                    description: Config data
+              required:
+                - data
+              description: Agent Config
+  /api/webhooks/config/remove/{key}:
+    parameters:
+      - in: path
+        required: true
+        name: key
+        description: Key
+        schema:
+          type: string
+          description: Key
+    delete:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/webhooks/config/list:
+    parameters: []
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: Agent Config
+                    items:
+                      type: string
+                      description: Keys
+                required:
+                  - data
+                description: Agent Config
+      parameters: []
+  /api/webhooks/config/get/{key}:
+    parameters:
+      - in: path
+        required: true
+        name: key
+        description: Key
+        schema:
+          type: string
+          description: Key
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    description: Agent Config
+                    items:
+                      type: object
+                      additionalProperties: true
+                      description: Config data
+                required:
+                  - data
+                description: Agent Config
+      parameters: []
+  /api/webhooks/sql/retry:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Demo body
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: array
+                  description: Agent Config
+                  items:
+                    type: object
+                    additionalProperties: true
+                    description: Config data
+              required:
+                - data
+              description: Agent Config
+  /api/live/list:
+    parameters: []
+    get:
+      description: A method which list all currently running calls
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calls:
+                    type: array
+                    description: List of running calls
+                    items:
+                      type: string
+                      description: Phone number
+                required:
+                  - calls
+                description: Response Wrapper
+      parameters: []
+  /api/live/attach/{number}:
+    parameters:
+      - in: path
+        required: true
+        name: number
+        description: Phone number
+        schema:
+          type: string
+          description: Phone number
+    get:
+      description: A method attaches to a running call
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transcriptions:
+                    type: array
+                    description: List of Transcriptions
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: number
+                          description: Timestamp
+                        transcription:
+                          type: string
+                          description: Transcription
+                        channel:
+                          type: string
+                          enum:
+                            - Channel_1
+                            - Channel_2
+                          description: Channel for a call
+                      required:
+                        - timestamp
+                        - transcription
+                        - channel
+                      description: Transcription
+                required:
+                  - transcriptions
+                description: Response Wrapper
+      parameters: []
+  /api/live/kill/{number}:
+    parameters:
+      - in: path
+        required: true
+        name: number
+        description: Phone number
+        schema:
+          type: string
+          description: Phone number
+    get:
+      description: A method which kills currently running calls
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/settings/keys/add:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Settings wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                owner_type:
+                  type: string
+                  enum:
+                    - personal
+                    - organization
+                  description: Owner Type
+                apifant_stt_key:
+                  type: string
+                  description: Description optional apifant_stt_key
+                apifant_tts_key:
+                  type: string
+                  description: Description optional apifant_tts_key
+                azure_stt_key:
+                  type: string
+                  description: Description optional azure_stt_key
+                azure_tts_key:
+                  type: string
+                  description: Description optional azure_tts_key
+                azure_sweden_stt_key:
+                  type: string
+                  description: Description optional azure_sweden_stt_key
+                azure_sweden_tts_key:
+                  type: string
+                  description: Description optional azure_sweden_tts_key
+                elevenlabs_tts_key:
+                  type: string
+                  description: Description optional elevenlabs_tts_key
+                gemini_key:
+                  type: string
+                  description: Description optional gemini_key
+                openai_key:
+                  type: string
+                  description: Description optional openai_key
+                azure_key:
+                  type: string
+                  description: Description optional azure_key
+              required:
+                - owner_type
+              description: Settings
+  /api/settings/keys/remove:
+    parameters: []
+    post:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Settings wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                owner_type:
+                  type: string
+                  enum:
+                    - personal
+                    - organization
+                  description: Owner Type
+                apifant_stt_key:
+                  type: boolean
+                  description: Description optional apifant_stt_key
+                apifant_tts_key:
+                  type: boolean
+                  description: Description optional apifant_tts_key
+                azure_stt_key:
+                  type: boolean
+                  description: Description optional azure_stt_key
+                azure_tts_key:
+                  type: boolean
+                  description: Description optional azure_tts_key
+                azure_sweden_stt_key:
+                  type: boolean
+                  description: Description optional azure_sweden_stt_key
+                azure_sweden_tts_key:
+                  type: boolean
+                  description: Description optional azure_sweden_tts_key
+                elevenlabs_tts_key:
+                  type: boolean
+                  description: Description optional elevenlabs_tts_key
+                gemini_key:
+                  type: boolean
+                  description: Description optional gemini_key
+                openai_key:
+                  type: boolean
+                  description: Description optional openai_key
+                azure_key:
+                  type: boolean
+                  description: Description optional azure_key
+              required:
+                - owner_type
+              description: Settings
+  /api/settings/keys/list/{type}:
+    parameters:
+      - in: path
+        required: true
+        name: type
+        description: Type
+        schema:
+          type: string
+          enum:
+            - personal
+            - organization
+          description: Type
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  apifant_stt_key:
+                    type: boolean
+                    description: Flag whether the key is already set apifant_stt_key
+                  apifant_tts_key:
+                    type: boolean
+                    description: Flag whether the key is already set apifant_tts_key
+                  azure_stt_key:
+                    type: boolean
+                    description: Flag whether the key is already set azure_stt_key
+                  azure_tts_key:
+                    type: boolean
+                    description: Flag whether the key is already set azure_tts_key
+                  azure_sweden_stt_key:
+                    type: boolean
+                    description: Flag whether the key is already set azure_sweden_stt_key
+                  azure_sweden_tts_key:
+                    type: boolean
+                    description: Flag whether the key is already set azure_sweden_tts_key
+                  elevenlabs_tts_key:
+                    type: boolean
+                    description: Flag whether the key is already set elevenlabs_tts_key
+                  gemini_key:
+                    type: boolean
+                    description: Flag whether the key is already set gemini_key
+                  openai_key:
+                    type: boolean
+                    description: Flag whether the key is already set openai_key
+                  azure_key:
+                    type: boolean
+                    description: Description optional azure_key
+                required:
+                  - apifant_stt_key
+                  - apifant_tts_key
+                  - azure_stt_key
+                  - azure_tts_key
+                  - azure_sweden_stt_key
+                  - azure_sweden_tts_key
+                  - elevenlabs_tts_key
+                  - gemini_key
+                  - openai_key
+                  - azure_key
+                description: Settings
+      parameters: []
+  /api/statistics/metrics:
+    parameters: []
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stt:
+                    type: object
+                    properties:
+                      currentInMs:
+                        type: number
+                        description: currentInMs
+                      averageInMs:
+                        type: number
+                        description: averageInMs
+                      total:
+                        type: number
+                        description: total
+                      amount:
+                        type: number
+                        description: amount
+                    required:
+                      - currentInMs
+                      - averageInMs
+                      - total
+                      - amount
+                    description: Metrics
+                  tts:
+                    type: object
+                    properties:
+                      currentInMs:
+                        type: number
+                        description: currentInMs
+                      averageInMs:
+                        type: number
+                        description: averageInMs
+                      total:
+                        type: number
+                        description: total
+                      amount:
+                        type: number
+                        description: amount
+                    required:
+                      - currentInMs
+                      - averageInMs
+                      - total
+                      - amount
+                    description: Metrics
+                  llm:
+                    type: object
+                    properties:
+                      currentInMs:
+                        type: number
+                        description: currentInMs
+                      averageInMs:
+                        type: number
+                        description: averageInMs
+                      total:
+                        type: number
+                        description: total
+                      amount:
+                        type: number
+                        description: amount
+                    required:
+                      - currentInMs
+                      - averageInMs
+                      - total
+                      - amount
+                    description: Metrics
+                required:
+                  - stt
+                  - tts
+                  - llm
+                description: Metrics
+      parameters: []
+  /api/character/add:
+    parameters: []
+    post:
+      description: Add a new character
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Character wrapper
+        content:
+          application/json:
+            schema: &a11
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of the character
+                model:
+                  type: string
+                  enum: *a10
+                  description: Model to be used
+                character_description:
+                  type: string
+                  description: Description of the character
+                voice:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - azure
+                        - elevenlabs
+                        - apifant
+                        - azure-sweden
+                      description: Type of voice provider
+                    name:
+                      type: string
+                      description: name
+                    id:
+                      type: string
+                      description: id
+                    voice_id:
+                      type: string
+                      description: id of the voice provider
+                  required:
+                    - type
+                    - name
+                    - id
+                    - voice_id
+                  description: Voice Config
+                visibility:
+                  type: string
+                  enum:
+                    - private
+                    - public
+                    - organization
+                  description: Visibility level
+                detection_type:
+                  type: string
+                  description: Type of detection/trigger for the character
+                personality_traits:
+                  type: object
+                  properties:
+                    instruction:
+                      type: string
+                      description: Main instruction for character behavior
+                    behavior_patterns:
+                      type: string
+                      description: How the character behaves
+                    communication_style:
+                      type: string
+                      description: Character's communication approach
+                    emotional_traits:
+                      type: string
+                      description: Emotional characteristics
+                    background_story:
+                      type: string
+                      description: Character's backstory
+                    speaking_patterns:
+                      type: string
+                      description: How the character speaks
+                  required:
+                    - instruction
+                    - behavior_patterns
+                    - communication_style
+                    - emotional_traits
+                    - background_story
+                    - speaking_patterns
+                  description: Personality Traits
+                owner_type:
+                  type: string
+                  enum: *a2
+                  description: Owner Type
+                extraconfig:
+                  type: object
+                  additionalProperties: true
+                  description: Extra character config data
+              required:
+                - name
+                - model
+                - character_description
+                - voice
+                - visibility
+                - detection_type
+                - personality_traits
+                - owner_type
+              description: Character
+  /api/character/list:
+    parameters: []
+    get:
+      description: Return list of all character objects
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  characters:
+                    type: array
+                    description: List of all character objects
+                    items: &a12
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Id of character
+                        name:
+                          type: string
+                          description: Name of the character
+                        character_description:
+                          type: string
+                          description: Description of the character
+                        visibility:
+                          type: string
+                          enum:
+                            - private
+                            - public
+                            - organization
+                          description: Visibility level
+                        detection_type:
+                          type: string
+                          description: Type of detection/trigger for the character
+                        owner_type:
+                          type: string
+                          enum: *a2
+                          description: Owner Type
+                        voice:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                                - azure
+                                - elevenlabs
+                                - apifant
+                                - azure-sweden
+                              description: Type of voice provider
+                            name:
+                              type: string
+                              description: name
+                            id:
+                              type: string
+                              description: id
+                            voice_id:
+                              type: string
+                              description: id of the voice provider
+                          required:
+                            - type
+                            - name
+                            - id
+                            - voice_id
+                          description: Voice Config
+                      required:
+                        - id
+                        - name
+                        - character_description
+                        - visibility
+                        - detection_type
+                        - owner_type
+                      description: Character
+                required:
+                  - characters
+                description: Response Wrapper
+      parameters: []
+  /api/character/find/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of character object
+        schema:
+          type: string
+          description: Id of character object
+    get:
+      description: Find a specific character by ID
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  character:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Id of character
+                      name:
+                        type: string
+                        description: Name of the character
+                      model:
+                        type: string
+                        enum: *a10
+                        description: Model to be used
+                      character_description:
+                        type: string
+                        description: Description of the character
+                      voice:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - azure
+                              - elevenlabs
+                              - apifant
+                              - azure-sweden
+                            description: Type of voice provider
+                          name:
+                            type: string
+                            description: name
+                          id:
+                            type: string
+                            description: id
+                          voice_id:
+                            type: string
+                            description: id of the voice provider
+                        required:
+                          - type
+                          - name
+                          - id
+                          - voice_id
+                        description: Voice Config
+                      visibility:
+                        type: string
+                        enum:
+                          - private
+                          - public
+                          - organization
+                        description: Visibility level
+                      detection_type:
+                        type: string
+                        description: Type of detection/trigger for the character
+                      personality_traits:
+                        type: object
+                        properties:
+                          instruction:
+                            type: string
+                            description: Main instruction for character behavior
+                          behavior_patterns:
+                            type: string
+                            description: How the character behaves
+                          communication_style:
+                            type: string
+                            description: Character's communication approach
+                          emotional_traits:
+                            type: string
+                            description: Emotional characteristics
+                          background_story:
+                            type: string
+                            description: Character's backstory
+                          speaking_patterns:
+                            type: string
+                            description: How the character speaks
+                        required:
+                          - instruction
+                          - behavior_patterns
+                          - communication_style
+                          - emotional_traits
+                          - background_story
+                          - speaking_patterns
+                        description: Personality Traits
+                      owner_type:
+                        type: string
+                        enum: *a2
+                        description: Owner Type
+                      extraconfig:
+                        type: object
+                        additionalProperties: true
+                        description: Extra character config data
+                    required:
+                      - id
+                      - name
+                      - model
+                      - character_description
+                      - voice
+                      - visibility
+                      - detection_type
+                      - personality_traits
+                      - owner_type
+                    description: Character
+                required:
+                  - character
+                description: Response Wrapper
+      parameters: []
+  /api/character/update/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of character object
+        schema:
+          type: string
+          description: Id of character object
+    post:
+      description: Update a character configuration
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Character wrapper
+        content:
+          application/json:
+            schema: *a11
+  /api/character/remove/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of character object
+        schema:
+          type: string
+          description: Id of character object
+    delete:
+      description: Remove a character
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+  /api/character/assign:
+    parameters: []
+    post:
+      description: Assign a character to a phone number
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Character Assignment wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phonenumberId:
+                  type: string
+                  description: Id of phonenumber
+                characterId:
+                  type: string
+                  description: Id of character
+              required:
+                - phonenumberId
+                - characterId
+              description: Character Assignment
+  /api/character/accessible:
+    parameters: []
+    get:
+      description: Return list of accessible characters based on user permissions
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  characters:
+                    type: array
+                    description: List of accessible character objects
+                    items: *a12
+                required:
+                  - characters
+                description: Response Wrapper
+      parameters: []
+  /api/character/visibility/update/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of character object
+        schema:
+          type: string
+          description: Id of character object
+    post:
+      description: Update character visibility
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Visibility Update wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                visibility:
+                  type: string
+                  enum:
+                    - private
+                    - public
+                    - organization
+                  description: New visibility level
+              required:
+                - visibility
+              description: Visibility Update
+  /api/character/personality/update/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of character object
+        schema:
+          type: string
+          description: Id of character object
+    post:
+      description: Update character personality traits
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Personality Update wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                instruction:
+                  type: string
+                  description: Main instruction for character behavior
+                behavior_patterns:
+                  type: string
+                  description: How the character behaves
+                communication_style:
+                  type: string
+                  description: Character's communication approach
+                emotional_traits:
+                  type: string
+                  description: Emotional characteristics
+                background_story:
+                  type: string
+                  description: Character's backstory
+                speaking_patterns:
+                  type: string
+                  description: How the character speaks
+              required:
+                - instruction
+                - behavior_patterns
+                - communication_style
+                - emotional_traits
+                - background_story
+                - speaking_patterns
+              description: Personality Traits Update
+  /api/character/voice/assign/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of character object
+        schema:
+          type: string
+          description: Id of character object
+    post:
+      description: Assign a voice to a character
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                required:
+                  - msg
+                description: Response Wrapper
+      parameters: []
+      requestBody:
+        description: Request Voice Assignment wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                voiceID:
+                  type: string
+                  description: Id of voice
+                characterId:
+                  type: string
+                  description: Id of character
+              required:
+                - voiceID
+                - characterId
+              description: Voice Assignment
+components:
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
