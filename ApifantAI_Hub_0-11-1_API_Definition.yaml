@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   description: Demo for a phone ai assistant
   title: "@tribe/ai-assistant-hub"
-  version: 0.7.1
+  version: 0.11.1
 servers:
   - url: http://localhost:3002
 security:
@@ -31,9 +31,12 @@ paths:
         description: Request Assistant wrapper
         content:
           application/json:
-            schema: &a4
+            schema: &a2
               type: object
               properties:
+                model:
+                  type: string
+                  description: Model to be used
                 data:
                   type: object
                   properties:
@@ -55,25 +58,24 @@ paths:
                     greeting:
                       type: string
                       description: Assistant Greeting
-                    target_language:
-                      type: string
-                      enum: &a1
-                        - en
-                        - es
-                        - fr
-                        - de
-                        - it
-                        - pt
-                        - nl
-                        - ru
-                        - zh
-                        - ja
-                        - ko
-                        - ar
-                      description: Target language for the transcription
                     result_target_webhook:
                       type: string
                       description: Target url where to post the data to
+                    result_target_webhook_auth_type:
+                      type: string
+                      description: Auth type to to post the data to
+                    result_target_webhook_auth_key:
+                      type: string
+                      description: Auth key to post the data to
+                    conversation_target_webhook:
+                      type: string
+                      description: Target url where to post the conversation data to
+                    conversation_target_webhook_auth_type:
+                      type: string
+                      description: Auth type to post the conversation data to
+                    conversation_target_webhook_auth_key:
+                      type: string
+                      description: Auth key to post the conversation data to
                   required:
                     - name
                     - instruction
@@ -83,19 +85,12 @@ paths:
                 type:
                   type: string
                   description: Type of assistant
-                detection:
+                visibility:
                   type: string
                   enum:
-                    - azure
-                    - apifant
-                  description: Type of voice detection provider
-                owner_type:
-                  type: string
-                  enum: &a2
+                    - private
                     - public
-                    - personal
-                    - organization
-                  description: Owner Type
+                  description: Visibility level
                 character_id:
                   type: string
                   description: ID of associated character (optional)
@@ -115,6 +110,9 @@ paths:
                   required:
                     - allowBarkIn
                   description: Assistant Config
+                model_endpoint:
+                  type: string
+                  description: Endpoint for the Model to be used
                 additionalInstructions:
                   type: array
                   description: Additional instructions
@@ -122,10 +120,11 @@ paths:
                     type: string
                     description: Additional instruction
               required:
+                - model
                 - data
                 - type
-                - detection
-                - owner_type
+                - visibility
+                - character_id
               description: Assistant
   /api/assistant/assign:
     parameters: []
@@ -178,7 +177,7 @@ paths:
                   assistant:
                     type: array
                     description: List of all assistant objects
-                    items: &a3
+                    items: &a1
                       type: object
                       properties:
                         id:
@@ -205,13 +204,24 @@ paths:
                             greeting:
                               type: string
                               description: Assistant Greeting
-                            target_language:
-                              type: string
-                              enum: *a1
-                              description: Target language for the transcription
                             result_target_webhook:
                               type: string
                               description: Target url where to post the data to
+                            result_target_webhook_auth_type:
+                              type: string
+                              description: Auth type to to post the data to
+                            result_target_webhook_auth_key:
+                              type: string
+                              description: Auth key to post the data to
+                            conversation_target_webhook:
+                              type: string
+                              description: Target url where to post the conversation data to
+                            conversation_target_webhook_auth_type:
+                              type: string
+                              description: Auth type to post the conversation data to
+                            conversation_target_webhook_auth_key:
+                              type: string
+                              description: Auth key to post the conversation data to
                           required:
                             - name
                             - instruction
@@ -221,19 +231,139 @@ paths:
                         type:
                           type: string
                           description: Type of assistant
-                        detection:
+                        visibility:
                           type: string
                           enum:
-                            - azure
-                            - apifant
-                          description: Type of voice provider
-                        owner_type:
+                            - private
+                            - public
+                          description: Visibility level
+                        character: &a9
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              description: Id of character
+                            name:
+                              type: string
+                              description: Name of the character
+                            model:
+                              type: string
+                              description: Model to be used
+                            character_description:
+                              type: string
+                              description: Description of the character
+                            voice:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  description: Type of voice provider
+                                name:
+                                  type: string
+                                  description: name
+                                id:
+                                  type: string
+                                  description: id
+                                voice_id:
+                                  type: string
+                                  description: id of the voice provider
+                                language:
+                                  type: string
+                                  description: language
+                              required:
+                                - type
+                                - name
+                                - id
+                                - voice_id
+                              description: Voice Config
+                            visibility:
+                              type: string
+                              enum:
+                                - private
+                                - public
+                              description: Visibility level
+                            detection_type:
+                              type: string
+                              description: Type of detection/trigger for the character
+                            personality_traits:
+                              type: object
+                              properties:
+                                instruction:
+                                  type: string
+                                  description: Main instruction for character behavior
+                                behavior_patterns:
+                                  type: string
+                                  description: How the character behaves
+                                communication_style:
+                                  type: string
+                                  description: Character's communication approach
+                                emotional_traits:
+                                  type: string
+                                  description: Emotional characteristics
+                                background_story:
+                                  type: string
+                                  description: Character's backstory
+                                speaking_patterns:
+                                  type: string
+                                  description: How the character speaks
+                              required:
+                                - instruction
+                                - behavior_patterns
+                                - communication_style
+                                - emotional_traits
+                                - background_story
+                                - speaking_patterns
+                              description: Personality Traits
+                            target_language:
+                              type: string
+                              enum: &a8
+                                - en
+                                - es
+                                - fr
+                                - de
+                                - it
+                                - pt
+                                - nl
+                                - ru
+                                - zh
+                                - ja
+                                - ko
+                                - ar
+                              description: Target language for the transcription
+                            stt_type:
+                              type: string
+                              enum:
+                                - azure
+                                - apifant
+                              description: Type of speech detection provider
+                            extraconfig:
+                              type: object
+                              additionalProperties: true
+                              description: Extra character config data
+                            ollama_url:
+                              type: string
+                              description: Ollama server URL
+                            ollama_models:
+                              type: string
+                              description: Comma-separated list of available Ollama models
+                            model_endpoint:
+                              type: string
+                              description: Endpoint for the Model to be used
+                          required:
+                            - id
+                            - name
+                            - model
+                            - character_description
+                            - voice
+                            - visibility
+                            - detection_type
+                            - personality_traits
+                            - target_language
+                            - stt_type
+                          description: Character
+                        model:
                           type: string
-                          enum: *a2
-                          description: Owner Type
-                        character_id:
-                          type: string
-                          description: ID of associated character (optional)
+                          description: Model to be used
                         parallel_mode:
                           type: boolean
                           description: Allow ai to run in cluster for fastest execution
@@ -250,6 +380,9 @@ paths:
                           required:
                             - allowBarkIn
                           description: Assistant Config
+                        model_endpoint:
+                          type: string
+                          description: Endpoint for the Model to be used
                         additionalInstructions:
                           type: array
                           description: Additional instructions
@@ -260,11 +393,42 @@ paths:
                         - id
                         - data
                         - type
-                        - detection
-                        - owner_type
+                        - visibility
+                        - character
+                        - model
                       description: Assistant
                 required:
                   - assistant
+                description: Response Wrapper
+      parameters: []
+  /api/assistant/copy/{id}:
+    parameters:
+      - in: path
+        required: true
+        name: id
+        description: Id of assistant object
+        schema:
+          type: string
+          description: Id of assistant object
+    get:
+      description: No Description
+      responses:
+        "200":
+          description: Response Message
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Success
+                  assistant_id:
+                    type: string
+                    description: assistant_id
+                required:
+                  - msg
+                  - assistant_id
                 description: Response Wrapper
       parameters: []
   /api/assistant/find/{id}:
@@ -286,7 +450,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  assistant: *a3
+                  assistant: *a1
                 required:
                   - assistant
                 description: Response Wrapper
@@ -347,7 +511,7 @@ paths:
         description: Request Params to add assistant
         content:
           application/json:
-            schema: *a4
+            schema: *a2
   /api/assistant/type/list:
     parameters: []
     get:
@@ -821,6 +985,20 @@ paths:
         schema:
           type: string
           description: Number to call with configured assistant
+      - in: query
+        required: true
+        name: assistantID
+        description: assistantID
+        schema:
+          description: assistantID
+          type: string
+      - in: query
+        required: false
+        name: additionalInstructions
+        description: additionalInstructions
+        schema:
+          description: additionalInstructions
+          type: string
     post:
       description: No Description
       responses:
@@ -838,21 +1016,6 @@ paths:
                   - msg
                 description: Response Wrapper
       parameters: []
-      requestBody:
-        description: Request PhoneNumber wrapper
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                assistantID:
-                  type: string
-                  description: assistantID
-                additionalInstructions:
-                  type: string
-                  description: additionalInstructions
-              required: []
-              description: Response Wrapper
   /api/phonenumber/mode/{id}/{mode}:
     parameters:
       - in: path
@@ -868,7 +1031,7 @@ paths:
         description: Different setups for the phonenumber and how it acts.
         schema:
           type: string
-          enum: &a5
+          enum: &a3
             - production
             - test
             - echo
@@ -913,7 +1076,7 @@ paths:
         description: Request PhoneNumber wrapper
         content:
           application/json:
-            schema: &a7
+            schema: &a5
               type: object
               properties:
                 data:
@@ -936,7 +1099,7 @@ paths:
                       description: Flag whether number is active
                     mode:
                       type: string
-                      enum: *a5
+                      enum: *a3
                       description: Different setups for the phonenumber and how it acts.
                   required:
                     - value
@@ -946,16 +1109,11 @@ paths:
                     - active
                     - mode
                   description: PhoneNumber Config
-                owner_type:
-                  type: string
-                  enum: *a2
-                  description: Owner Type
                 assignedassistantid:
                   type: string
                   description: Id of pthe assigned assistant
               required:
                 - data
-                - owner_type
               description: PhoneNumber
   /api/phonenumber/list:
     parameters: []
@@ -972,7 +1130,7 @@ paths:
                   phonenumber:
                     type: array
                     description: List of all phonenumber objects
-                    items: &a6
+                    items: &a4
                       type: object
                       properties:
                         id:
@@ -998,7 +1156,7 @@ paths:
                               description: Flag whether number is active
                             mode:
                               type: string
-                              enum: *a5
+                              enum: *a3
                               description: Different setups for the phonenumber and how it acts.
                           required:
                             - value
@@ -1008,10 +1166,6 @@ paths:
                             - active
                             - mode
                           description: PhoneNumber Config
-                        owner_type:
-                          type: string
-                          enum: *a2
-                          description: Owner Type
                         assignedassistantid:
                           type: string
                           description: Id of pthe assigned assistant
@@ -1021,7 +1175,6 @@ paths:
                       required:
                         - id
                         - data
-                        - owner_type
                       description: PhoneNumber
                 required:
                   - phonenumber
@@ -1046,7 +1199,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  phonenumber: *a6
+                  phonenumber: *a4
                 required:
                   - phonenumber
                 description: Response Wrapper
@@ -1107,7 +1260,7 @@ paths:
         description: Request Params to add phonenumber
         content:
           application/json:
-            schema: *a7
+            schema: *a5
   /api/chat/start:
     parameters: []
     post:
@@ -1120,7 +1273,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  chat: &a8
+                  chat: &a6
                     type: object
                     properties:
                       id:
@@ -1168,10 +1321,6 @@ paths:
                           - inbound
                           - outbound
                         description: Type of conversation
-                      owner_type:
-                        type: string
-                        enum: *a2
-                        description: Owner Type
                     required:
                       - id
                       - timestamp
@@ -1179,7 +1328,6 @@ paths:
                       - assignedassistantid
                       - messages
                       - type
-                      - owner_type
                     description: Chat
                 required:
                   - chat
@@ -1204,28 +1352,11 @@ paths:
                     - inbound
                     - outbound
                   description: Type of conversation
-                owner_type:
-                  type: string
-                  enum: *a2
-                  description: Owner Type
                 message:
                   type: string
                   description: First message of chat
                 model:
                   type: string
-                  enum: &a10
-                    - OpenAi gpt-3.5-turbo
-                    - OpenAi gpt-4o-mini
-                    - OpenAi gpt-4
-                    - OpenAi gpt-4-turbo
-                    - Azure gpt-4o-mini
-                    - Azure gpt-35-turbo
-                    - Azure gpt-35-turbo-16k
-                    - Google gemini-1.5-flash
-                    - Google gemini-2.0-flash
-                    - Ollama llama3:latest
-                    - Ollama deepseek-r1:8b
-                    - Ollama qwen2.5:7b
                   description: Model to be used
                 overdial:
                   type: string
@@ -1234,7 +1365,6 @@ paths:
                 - name
                 - assignedassistantid
                 - type
-                - owner_type
               description: Chat
   /api/chat/add:
     parameters: []
@@ -1248,7 +1378,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  chat: *a8
+                  chat: *a6
                 required:
                   - chat
                 description: Response Wrapper
@@ -1266,6 +1396,9 @@ paths:
                 message:
                   type: string
                   description: First message of chat
+                dontShowToolCallingFlag:
+                  type: boolean
+                  description: Flag to hide toolcalling from chat
               required:
                 - id
                 - message
@@ -1306,16 +1439,12 @@ paths:
                             - inbound
                             - outbound
                           description: Type of conversation
-                        owner_type:
-                          type: string
-                          description: id of the voice provider
                       required:
                         - id
                         - timestamp
                         - name
                         - assignedassistantid
                         - type
-                        - owner_type
                       description: Chat
                 required:
                   - chats
@@ -1330,6 +1459,15 @@ paths:
         schema:
           type: string
           description: Id of chat object
+      - in: query
+        required: false
+        name: dontShowToolCallingFlag
+        description: Flag to hide toolcalling from chat
+        schema:
+          description: Flag to hide toolcalling from chat
+          type: string
+          enum:
+            - "true"
     get:
       description: No Description
       responses:
@@ -1340,7 +1478,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  chat: *a8
+                  chat: *a6
                 required:
                   - chat
                 description: Response Wrapper
@@ -1394,7 +1532,7 @@ paths:
         description: Request Voice wrapper
         content:
           application/json:
-            schema: &a9
+            schema: &a7
               type: object
               properties:
                 voice_id:
@@ -1402,11 +1540,6 @@ paths:
                   description: Voice identifier from the provider
                 type:
                   type: string
-                  enum:
-                    - azure
-                    - elevenlabs
-                    - apifant
-                    - azure-sweden
                   description: Type of voice provider
                 name:
                   type: string
@@ -1445,11 +1578,6 @@ paths:
                           description: id of the voice provider
                         type:
                           type: string
-                          enum:
-                            - azure
-                            - elevenlabs
-                            - apifant
-                            - azure-sweden
                           description: Type of voice provider
                       required:
                         - name
@@ -1491,11 +1619,6 @@ paths:
                         description: Voice identifier from the provider
                       type:
                         type: string
-                        enum:
-                          - azure
-                          - elevenlabs
-                          - apifant
-                          - azure-sweden
                         description: Type of voice provider
                       name:
                         type: string
@@ -1540,7 +1663,7 @@ paths:
         description: Request Voice wrapper
         content:
           application/json:
-            schema: *a9
+            schema: *a7
   /api/voices/remove/{id}:
     parameters:
       - in: path
@@ -1567,42 +1690,6 @@ paths:
                   - msg
                 description: Response Wrapper
       parameters: []
-  /api/voices/assign:
-    parameters: []
-    post:
-      description: No Description
-      responses:
-        "200":
-          description: Response Message
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  msg:
-                    type: string
-                    description: Success
-                required:
-                  - msg
-                description: Response Wrapper
-      parameters: []
-      requestBody:
-        description: Request Assistant wrapper
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                voiceID:
-                  type: string
-                  description: Id of voice
-                assistantId:
-                  type: string
-                  description: Id of assistant
-              required:
-                - voiceID
-                - assistantId
-              description: Assistant
   /api/webhooks/confirm:
     parameters: []
     post:
@@ -1933,12 +2020,6 @@ paths:
             schema:
               type: object
               properties:
-                owner_type:
-                  type: string
-                  enum:
-                    - personal
-                    - organization
-                  description: Owner Type
                 apifant_stt_key:
                   type: string
                   description: Description optional apifant_stt_key
@@ -1969,8 +2050,7 @@ paths:
                 azure_key:
                   type: string
                   description: Description optional azure_key
-              required:
-                - owner_type
+              required: []
               description: Settings
   /api/settings/keys/remove:
     parameters: []
@@ -1998,12 +2078,6 @@ paths:
             schema:
               type: object
               properties:
-                owner_type:
-                  type: string
-                  enum:
-                    - personal
-                    - organization
-                  description: Owner Type
                 apifant_stt_key:
                   type: boolean
                   description: Description optional apifant_stt_key
@@ -2034,21 +2108,10 @@ paths:
                 azure_key:
                   type: boolean
                   description: Description optional azure_key
-              required:
-                - owner_type
+              required: []
               description: Settings
-  /api/settings/keys/list/{type}:
-    parameters:
-      - in: path
-        required: true
-        name: type
-        description: Type
-        schema:
-          type: string
-          enum:
-            - personal
-            - organization
-          description: Type
+  /api/settings/keys/list:
+    parameters: []
     get:
       description: No Description
       responses:
@@ -2206,7 +2269,7 @@ paths:
         description: Request Character wrapper
         content:
           application/json:
-            schema: &a11
+            schema: &a10
               type: object
               properties:
                 name:
@@ -2214,7 +2277,6 @@ paths:
                   description: Name of the character
                 model:
                   type: string
-                  enum: *a10
                   description: Model to be used
                 character_description:
                   type: string
@@ -2224,11 +2286,6 @@ paths:
                   properties:
                     type:
                       type: string
-                      enum:
-                        - azure
-                        - elevenlabs
-                        - apifant
-                        - azure-sweden
                       description: Type of voice provider
                     name:
                       type: string
@@ -2239,6 +2296,9 @@ paths:
                     voice_id:
                       type: string
                       description: id of the voice provider
+                    language:
+                      type: string
+                      description: language
                   required:
                     - type
                     - name
@@ -2250,11 +2310,16 @@ paths:
                   enum:
                     - private
                     - public
-                    - organization
                   description: Visibility level
                 detection_type:
                   type: string
                   description: Type of detection/trigger for the character
+                stt_type:
+                  type: string
+                  enum:
+                    - azure
+                    - apifant
+                  description: Type of speech detection provider
                 personality_traits:
                   type: object
                   properties:
@@ -2284,14 +2349,23 @@ paths:
                     - background_story
                     - speaking_patterns
                   description: Personality Traits
-                owner_type:
+                target_language:
                   type: string
-                  enum: *a2
-                  description: Owner Type
+                  enum: *a8
+                  description: Target language for the transcription
                 extraconfig:
                   type: object
                   additionalProperties: true
                   description: Extra character config data
+                ollama_url:
+                  type: string
+                  description: Ollama server URL
+                ollama_models:
+                  type: string
+                  description: Comma-separated list of available Ollama models
+                model_endpoint:
+                  type: string
+                  description: Endpoint for the Model to be used
               required:
                 - name
                 - model
@@ -2299,11 +2373,19 @@ paths:
                 - voice
                 - visibility
                 - detection_type
+                - stt_type
                 - personality_traits
-                - owner_type
+                - target_language
               description: Character
   /api/character/list:
-    parameters: []
+    parameters:
+      - in: query
+        required: false
+        name: language
+        description: Language Code in ISO 639
+        schema:
+          description: Language Code in ISO 639
+          type: string
     get:
       description: Return list of all character objects
       responses:
@@ -2317,66 +2399,7 @@ paths:
                   characters:
                     type: array
                     description: List of all character objects
-                    items: &a12
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          description: Id of character
-                        name:
-                          type: string
-                          description: Name of the character
-                        character_description:
-                          type: string
-                          description: Description of the character
-                        visibility:
-                          type: string
-                          enum:
-                            - private
-                            - public
-                            - organization
-                          description: Visibility level
-                        detection_type:
-                          type: string
-                          description: Type of detection/trigger for the character
-                        owner_type:
-                          type: string
-                          enum: *a2
-                          description: Owner Type
-                        voice:
-                          type: object
-                          properties:
-                            type:
-                              type: string
-                              enum:
-                                - azure
-                                - elevenlabs
-                                - apifant
-                                - azure-sweden
-                              description: Type of voice provider
-                            name:
-                              type: string
-                              description: name
-                            id:
-                              type: string
-                              description: id
-                            voice_id:
-                              type: string
-                              description: id of the voice provider
-                          required:
-                            - type
-                            - name
-                            - id
-                            - voice_id
-                          description: Voice Config
-                      required:
-                        - id
-                        - name
-                        - character_description
-                        - visibility
-                        - detection_type
-                        - owner_type
-                      description: Character
+                    items: *a9
                 required:
                   - characters
                 description: Response Wrapper
@@ -2400,106 +2423,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  character:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        description: Id of character
-                      name:
-                        type: string
-                        description: Name of the character
-                      model:
-                        type: string
-                        enum: *a10
-                        description: Model to be used
-                      character_description:
-                        type: string
-                        description: Description of the character
-                      voice:
-                        type: object
-                        properties:
-                          type:
-                            type: string
-                            enum:
-                              - azure
-                              - elevenlabs
-                              - apifant
-                              - azure-sweden
-                            description: Type of voice provider
-                          name:
-                            type: string
-                            description: name
-                          id:
-                            type: string
-                            description: id
-                          voice_id:
-                            type: string
-                            description: id of the voice provider
-                        required:
-                          - type
-                          - name
-                          - id
-                          - voice_id
-                        description: Voice Config
-                      visibility:
-                        type: string
-                        enum:
-                          - private
-                          - public
-                          - organization
-                        description: Visibility level
-                      detection_type:
-                        type: string
-                        description: Type of detection/trigger for the character
-                      personality_traits:
-                        type: object
-                        properties:
-                          instruction:
-                            type: string
-                            description: Main instruction for character behavior
-                          behavior_patterns:
-                            type: string
-                            description: How the character behaves
-                          communication_style:
-                            type: string
-                            description: Character's communication approach
-                          emotional_traits:
-                            type: string
-                            description: Emotional characteristics
-                          background_story:
-                            type: string
-                            description: Character's backstory
-                          speaking_patterns:
-                            type: string
-                            description: How the character speaks
-                        required:
-                          - instruction
-                          - behavior_patterns
-                          - communication_style
-                          - emotional_traits
-                          - background_story
-                          - speaking_patterns
-                        description: Personality Traits
-                      owner_type:
-                        type: string
-                        enum: *a2
-                        description: Owner Type
-                      extraconfig:
-                        type: object
-                        additionalProperties: true
-                        description: Extra character config data
-                    required:
-                      - id
-                      - name
-                      - model
-                      - character_description
-                      - voice
-                      - visibility
-                      - detection_type
-                      - personality_traits
-                      - owner_type
-                    description: Character
+                  character: *a9
                 required:
                   - character
                 description: Response Wrapper
@@ -2534,7 +2458,7 @@ paths:
         description: Request Character wrapper
         content:
           application/json:
-            schema: *a11
+            schema: *a10
   /api/character/remove/{id}:
     parameters:
       - in: path
@@ -2597,26 +2521,6 @@ paths:
                 - phonenumberId
                 - characterId
               description: Character Assignment
-  /api/character/accessible:
-    parameters: []
-    get:
-      description: Return list of accessible characters based on user permissions
-      responses:
-        "200":
-          description: Response Message
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  characters:
-                    type: array
-                    description: List of accessible character objects
-                    items: *a12
-                required:
-                  - characters
-                description: Response Wrapper
-      parameters: []
   /api/character/visibility/update/{id}:
     parameters:
       - in: path
@@ -2655,8 +2559,7 @@ paths:
                   enum:
                     - private
                     - public
-                    - organization
-                  description: New visibility level
+                  description: Visibility level
               required:
                 - visibility
               description: Visibility Update
@@ -2762,6 +2665,40 @@ paths:
                 - voiceID
                 - characterId
               description: Voice Assignment
+  /api/speech/generate:
+    parameters: []
+    post:
+      description: Add a new voice configuration
+      responses:
+        "200":
+          description: Audio Wav binary
+          content:
+            audio/wav:
+              schema:
+                type: string
+                format: binary
+                description: Binary
+      parameters: []
+      requestBody:
+        description: Request Voice wrapper
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                character_id:
+                  type: string
+                  description: Character identifier from the provider
+                text:
+                  type: string
+                  description: Test to be converted to speech
+                language:
+                  type: string
+                  description: Lanuage
+              required:
+                - character_id
+                - text
+              description: Speech Create
 components:
   securitySchemes:
     bearerAuth:
